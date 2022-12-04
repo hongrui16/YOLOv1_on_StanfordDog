@@ -4,6 +4,9 @@ import os
 import random
 import argparse
 import time
+from time import gmtime, strftime
+import pytz
+import datetime
 
 import torch
 import torch.nn.functional as F
@@ -12,12 +15,14 @@ from copy import deepcopy
 
 from data.coco import COCODataset
 from data.voc0712 import VOCDetection
+from data.stanford_dog import StanfordDogDataset
 from data.transform import Augmentation, BaseTransform
 
 from utils.misc import detection_collate
 from utils.com_paras_flops import FLOPs_and_Params
 from evaluator.cocoapi_evaluator import COCOAPIEvaluator
 from evaluator.vocapi_evaluator import VOCAPIEvaluator
+from evaluator.StanfordDogapi_evaluator import StanfordDogAPIEvaluator
 
 from models.build import build_yolo
 from models.matcher import gt_creator
@@ -28,12 +33,11 @@ def parse_args():
     # 基本参数
     parser.add_argument('--cuda', action='store_true', default=False,
                         help='use cuda.')
-    parser.add_argument('--tfboard', action='store_true', default=False,
+    parser.add_argument('--tfboard', action='store_true', default=True,
                         help='use tensorboard')
     parser.add_argument('--eval_epoch', type=int,
                             default=10, help='interval between evaluations')
-    parser.add_argument('--save_folder', default='weights/', type=str, 
-                        help='Gamma update for SGD')
+
     parser.add_argument('--num_workers', default=8, type=int, 
                         help='Number of workers used in dataloading')
 
@@ -42,7 +46,7 @@ def parse_args():
                         help='yolo')
 
     # 训练配置
-    parser.add_argument('--batch_size', default=32, type=int, 
+    parser.add_argument('--batch_size', default=128, type=int, 
                         help='Batch size for training')
     parser.add_argument('-no_wp', '--no_warm_up', action='store_true', default=False,
                         help='yes or no to choose using warmup strategy to train')
@@ -54,9 +58,9 @@ def parse_args():
                         help='keep training')
     parser.add_argument('-ms', '--multi_scale', action='store_true', default=False,
                         help='use multi-scale trick')                  
-    parser.add_argument('--max_epoch', type=int, default=150,
+    parser.add_argument('--max_epoch', type=int, default=75,
                         help='The upper bound of warm-up')
-    parser.add_argument('--lr_epoch', nargs='+', default=[90, 120], type=int,
+    parser.add_argument('--lr_epoch', nargs='+', default=[50, 60], type=int,
                         help='lr epoch to decay')
 
     # 优化器参数
@@ -72,20 +76,34 @@ def parse_args():
     # 数据集参数
     parser.add_argument('-d', '--dataset', default='voc',
                         help='voc or coco')
-    parser.add_argument('--root', default='/mnt/share/ssd2/dataset',
+    parser.add_argument('--root', default=None,
                         help='data root')
 
+    parser.add_argument('--logs', default='logs_det',
+                        help='dir to save log')
+    parser.add_argument('--arch', default='resnet18',
+                        help='backbone arch')
+    parser.add_argument('--gpu', default=None, type=str,
+                    help='GPU id to use.')
     return parser.parse_args()
 
+def get_current_time():
+    tz = pytz.timezone('US/Eastern')
+    current_time = datetime.datetime.now(tz).strftime("%Y-%m-%d_%H-%M-%S")
+    return str(current_time)
 
 def train():
     args = parse_args()
     print("Setting Arguments.. : ", args)
     print("----------------------------------------------------------")
-
-    path_to_save = os.path.join(args.save_folder, args.dataset, args.version)
-    os.makedirs(path_to_save, exist_ok=True)
+    current_time = get_current_time()
+    log_dir = os.path.join(args.logs, args.dataset, args.arch, current_time)
+    path_to_save_weight = os.path.join(log_dir, 'weight')
     
+
+    if not args.gpu is None:
+        os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
+
     # 是否使用cuda
     if args.cuda:
         print('use cuda')
@@ -116,7 +134,7 @@ def train():
     model_copy = deepcopy(model)
     model_copy.trainable = False
     model_copy.eval()
-    FLOPs_and_Params(model=model_copy, 
+    FLOPs, Params = FLOPs_and_Params(model=model_copy, 
                         img_size=val_size, 
                         device=device)
     del model_copy
@@ -125,8 +143,8 @@ def train():
     if args.tfboard:
         print('use tensorboard')
         from torch.utils.tensorboard import SummaryWriter
-        c_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-        log_path = os.path.join('log/coco/', args.version, c_time)
+        # c_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+        log_path = os.path.join(log_dir, 'tensorboard')
         os.makedirs(log_path, exist_ok=True)
 
         writer = SummaryWriter(log_path)
@@ -148,7 +166,20 @@ def train():
     max_epoch = args.max_epoch                 # 最大训练轮次
     lr_epoch = args.lr_epoch
     epoch_size = len(dataloader)  # 每一训练轮次的迭代次数
-
+    os.makedirs(path_to_save_weight, exist_ok=True)
+    logfile = os.path.join(log_dir, 'train_parameters.txt')
+    if os.path.exists(logfile):
+        os.remove(logfile)
+    p=vars(args)
+    log_file = open(logfile, "a+")
+    log_file.write('current_time' + ':' + current_time + '\n')
+    log_file.write('\n')
+    for key, val in p.items():
+        log_file.write(key + ':' + str(val) + '\n')
+    log_file.write('\n')
+    log_file.write(FLOPs + '\n')
+    log_file.write(Params + '\n')
+    
     # 开始训练
     best_map = -1.
     t0 = time.time()
@@ -215,19 +246,28 @@ def train():
                             bbox_loss.item(), 
                             total_loss.item(), 
                             train_size, 
-                            t1-t0),
-                        flush=True)
+                            t1-t0))
 
                 t0 = time.time()
-
+            # break
         # evaluation
+        epoch_tr_print = '[Epoch %d/%d][Iter %d/%d][lr %.6f]'\
+                    '[Loss: obj %.2f || cls %.2f || bbox %.2f || total %.2f || size %d || time: %.2f]'\
+                        % (epoch+1, max_epoch, iter_i, epoch_size, tmp_lr,
+                            conf_loss.item(), 
+                            cls_loss.item(), 
+                            bbox_loss.item(), 
+                            total_loss.item(), 
+                            train_size, 
+                            t1-t0)
+        log_file.write(epoch_tr_print + '\n')
         if epoch  % args.eval_epoch == 0 or (epoch + 1) == max_epoch:
             model.trainable = False
             model.set_grid(val_size)
             model.eval()
 
             # evaluate
-            evaluator.evaluate(model)
+            ap50_95, ap50 = evaluator.evaluate(model)
 
             # convert to training mode.
             model.trainable = True
@@ -241,10 +281,15 @@ def train():
                 # save model
                 print('Saving state, epoch:', epoch + 1)
                 weight_name = '{}_epoch_{}_{:.1f}.pth'.format(args.version, epoch + 1, best_map*100)
-                checkpoint_path = os.path.join(path_to_save, weight_name)
-                torch.save(model.state_dict(), checkpoint_path)                      
+                checkpoint_path = os.path.join(path_to_save_weight, weight_name)
+                torch.save(model.state_dict(), checkpoint_path)
 
+            epoch_val_print = '[Epoch %d/%d][AP @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = %.2f || AP @[ IoU=0.50 | area=   all | maxDets=100 ] %.2f)'\
+                        % (epoch+1, max_epoch, ap50_95, ap50)                       
+            log_file.write(epoch_val_print + '\n')
 
+    log_file.close()
+    
 def set_lr(optimizer, lr):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
@@ -289,7 +334,23 @@ def build_dataset(args, device, train_size, val_size):
             device=device,
             transform=val_transform
             )
-    
+    elif args.dataset == 'StanfordDog':
+        # 加载StanfordDog数据集
+        data_root = os.path.join(args.root, 'stanfordDogsDataset')
+        num_classes = 120
+        dataset = StanfordDogDataset(
+            data_dir=data_root,
+            img_size=train_size,
+            transform=train_transform
+            )
+
+        evaluator = StanfordDogAPIEvaluator(
+            data_dir=data_root,
+            img_size=val_size,
+            device=device,
+            transform=val_transform
+            )
+
     else:
         print('unknow dataset !! Only support voc and coco !!')
         exit(0)

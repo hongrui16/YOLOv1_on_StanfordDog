@@ -1,9 +1,12 @@
 python train.py \
         --cuda \
-        -d coco \
-        -ms \
-        --batch_size 32 \
+        -d StanfordDog \
+        --batch_size 128 \
         --lr 0.001 \
-        --max_epoch 150 \
-        --lr_epoch 90 120 \
+        --root /home/hongrui/project/dataset \
+        --gpu 1 \
+        --arch resnet34
+        # --max_epoch 150 \
+        # --lr_epoch 90 120 \
+        # -ms \
         

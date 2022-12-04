@@ -10,7 +10,8 @@ from .loss import compute_loss
 
 # YOLO
 class myYOLO(nn.Module):
-    def __init__(self, device, input_size=None, num_classes=20, trainable=False, conf_thresh=0.01, nms_thresh=0.5):
+    def __init__(self, device, input_size=None, num_classes=20, trainable=False, 
+                    conf_thresh=0.01, nms_thresh=0.5, backbone_arch = 'resnet18'):
         super(myYOLO, self).__init__()
         self.device = device                           # cuda或者是cpu
         self.num_classes = num_classes                 # 类别的数量
@@ -22,7 +23,7 @@ class myYOLO(nn.Module):
         self.input_size = input_size                   # 输入图像大小
         
         # backbone: resnet18
-        self.backbone, feat_dim = build_resnet('resnet18', pretrained=trainable)
+        self.backbone, feat_dim = build_resnet(backbone_arch, pretrained=trainable)
 
         # neck: SPP
         self.neck = nn.Sequential(

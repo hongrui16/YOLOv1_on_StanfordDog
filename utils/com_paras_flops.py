@@ -9,6 +9,7 @@ def FLOPs_and_Params(model, img_size, device):
     print('==============================')
     print('FLOPs : {:.2f} B'.format(flops / 1e9))
     print('Params : {:.2f} M'.format(params / 1e6))
+    return 'FLOPs : {:.2f} B'.format(flops / 1e9), 'Params : {:.2f} M'.format(params / 1e6)
 
 
 if __name__ == "__main__":
