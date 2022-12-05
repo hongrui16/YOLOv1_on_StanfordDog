@@ -41,3 +41,9 @@ python train.py \
         --arch resnet18 \
         --pretrain
 ```
+
+## others(push a local repo to another remote repo)
+- git remote add [remote_name] [remote_branch_name]
+- git remote set-url [remote_name] [remote repo url]
+- git push [remote_name] [local_branch]:[remote_branch_name]
+- git branch --set-upstream-to=[remote_name]/[remote_branch_name] #set default push repo
