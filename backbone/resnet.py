@@ -219,6 +219,10 @@ def resnet152(pretrained=False, **kwargs):
 
 # build resnet
 def build_resnet(model_name='resnet18', pretrained=False):
+    if pretrained:
+        print('[INFO] load pre-trained backbone model')
+    else:
+        print('[INFO] load backbone without pre-trained model')
     if model_name == 'resnet18':
         model = resnet18(pretrained)
         feat_dim = 512

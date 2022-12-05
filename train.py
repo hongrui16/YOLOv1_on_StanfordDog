@@ -36,7 +36,7 @@ def parse_args():
     parser.add_argument('--tfboard', action='store_false', default=True,
                         help='use tensorboard')
     parser.add_argument('--eval_epoch', type=int,
-                            default=10, help='interval between evaluations')
+                            default=5, help='interval between evaluations')
 
     parser.add_argument('--num_workers', default=8, type=int, 
                         help='Number of workers used in dataloading')
@@ -89,6 +89,8 @@ def parse_args():
                     help='网络的最大步长')
     parser.add_argument('--pretrain', action='store_false', default=True,
                         help='use pre-trained model for backbone')
+    parser.add_argument('--input_size', default=0, type=int,
+                    help='input image size')
     return parser.parse_args()
 
 def get_current_time():
@@ -115,14 +117,18 @@ def train():
     else:
         device = torch.device("cpu")
 
-    # 是否使用多尺度训练
-    if args.multi_scale:
-        print('use the multi-scale trick ...')
-        train_size = 640
-        val_size = 416
+    if args.input_size:
+        train_size = args.input_size
+        val_size = args.input_size
     else:
-        train_size = 416
-        val_size = 416
+        # 是否使用多尺度训练
+        if args.multi_scale:
+            print('use the multi-scale trick ...')
+            train_size = 640
+            val_size = 416
+        else:
+            train_size = 416
+            val_size = 416
 
     # 构建dataset类和dataloader类
     dataset, num_classes, evaluator = build_dataset(args, device, train_size, val_size)
@@ -131,7 +137,7 @@ def train():
     dataloader = build_dataloader(args, dataset)
 
     # 构建我们的模型
-    model = build_yolo(args, device, train_size, num_classes, trainable=args.pretrain)
+    model = build_yolo(args, device, train_size, num_classes, trainable=True, pretrain = args.pretrain)
     model.to(device).train()
 
     # 计算模型的FLOPs和参数量
@@ -188,7 +194,7 @@ def train():
     best_map = -1.
     t0 = time.time()
     for epoch in range(args.start_epoch, max_epoch):
-
+        print(f'saving to {log_dir}.....')
         # 使用阶梯学习率衰减策略
         if epoch in lr_epoch:
             tmp_lr = tmp_lr * 0.1
@@ -253,7 +259,7 @@ def train():
                             t1-t0))
 
                 t0 = time.time()
-            # break
+            break
         # evaluation
         epoch_tr_print = '[Epoch %d/%d][Iter %d/%d][lr %.6f]'\
                     '[Loss: obj %.2f || cls %.2f || bbox %.2f || total %.2f || size %d || time: %.2f]'\

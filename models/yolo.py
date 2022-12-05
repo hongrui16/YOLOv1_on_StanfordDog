@@ -11,7 +11,7 @@ from .loss import compute_loss
 # YOLO
 class myYOLO(nn.Module):
     def __init__(self, device, input_size=None, num_classes=20, trainable=False, 
-                    conf_thresh=0.01, nms_thresh=0.5, backbone_arch = 'resnet18', stride = 32):
+                    conf_thresh=0.01, nms_thresh=0.5, backbone_arch = 'resnet18', pretrain = True, stride = 32):
         super(myYOLO, self).__init__()
         self.device = device                           # cuda或者是cpu
         self.num_classes = num_classes                 # 类别的数量
@@ -22,8 +22,15 @@ class myYOLO(nn.Module):
         self.grid_cell = self.create_grid(input_size)  # 网格坐标矩阵
         self.input_size = input_size                   # 输入图像大小
         
+        if stride == 32:
+            k_stride = 1
+            padding = 1
+        elif stride == 64:
+            k_stride = 2
+            padding = 1
+
         # backbone: resnet18
-        self.backbone, feat_dim = build_resnet(backbone_arch, pretrained=trainable)
+        self.backbone, feat_dim = build_resnet(backbone_arch, pretrained=pretrain)
 
         # neck: SPP
         self.neck = nn.Sequential(
@@ -36,12 +43,12 @@ class myYOLO(nn.Module):
             Conv(feat_dim, feat_dim//2, k=1),
             Conv(feat_dim//2, feat_dim, k=3, p=1),
             Conv(feat_dim, feat_dim//2, k=1),
-            Conv(feat_dim//2, feat_dim, k=3, p=1)
+            Conv(feat_dim//2, feat_dim, k=3, s=k_stride, p=padding)
         )
 
         # pred
         self.pred = nn.Conv2d(feat_dim, 1 + self.num_classes + 4, 1)
-    
+        
 
         if self.trainable:
             self.init_bias()
@@ -86,6 +93,8 @@ class myYOLO(nn.Module):
         """
             将txtytwth转换为常用的x1y1x2y2形式。
         """
+        # print('decode_boxes pred.size(): ', pred.size()) #169, 4 @ 416 input
+        # print('decode_boxes self.grid_cell.size(): ', self.grid_cell.size()) #169, 2 @ 416 input
         output = torch.zeros_like(pred)
         # 得到所有bbox 的中心点坐标和宽高
         pred[..., :2] = torch.sigmoid(pred[..., :2]) + self.grid_cell
@@ -227,20 +236,20 @@ class myYOLO(nn.Module):
         else:
             # backbone主干网络
             feat = self.backbone(x)
-
+            # print('1 feat.size(): ', feat.size()) #128, 512, 13, 13 @ 416 input
             # neck网络
             feat = self.neck(feat)
-
+            # print('2 feat.size(): ', feat.size()) #128, 512, 13, 13 @ 416 input
             # detection head网络
             feat = self.convsets(feat)
-
+            # print('3 feat.size(): ', feat.size()) #128, 512, 13, 13 @ 416 input
             # 预测层
             pred = self.pred(feat)
-
+            # print('pred.size(): ', pred.size()) #128, 125, 13, 13 @ 416 input
             # 对pred 的size做一些view调整，便于后续的处理
             # [B, C, H, W] -> [B, H, W, C] -> [B, H*W, C]
             pred = pred.permute(0, 2, 3, 1).contiguous().flatten(1, 2)
-
+            # print('pred.size(): ', pred.size()) #128, 169, 125 @ 416 input
             # 从pred中分离出objectness预测、类别class预测、bbox的txtytwth预测  
             # [B, H*W, 1]
             conf_pred = pred[..., :1]
