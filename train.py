@@ -33,7 +33,7 @@ def parse_args():
     # 基本参数
     parser.add_argument('--cuda', action='store_true', default=False,
                         help='use cuda.')
-    parser.add_argument('--tfboard', action='store_true', default=True,
+    parser.add_argument('--tfboard', action='store_false', default=True,
                         help='use tensorboard')
     parser.add_argument('--eval_epoch', type=int,
                             default=10, help='interval between evaluations')
@@ -85,6 +85,10 @@ def parse_args():
                         help='backbone arch')
     parser.add_argument('--gpu', default=None, type=str,
                     help='GPU id to use.')
+    parser.add_argument('--stride', default=32, type=int,
+                    help='网络的最大步长')
+    parser.add_argument('--pretrain', action='store_false', default=True,
+                        help='use pre-trained model for backbone')
     return parser.parse_args()
 
 def get_current_time():
@@ -127,7 +131,7 @@ def train():
     dataloader = build_dataloader(args, dataset)
 
     # 构建我们的模型
-    model = build_yolo(args, device, train_size, num_classes, trainable=True)
+    model = build_yolo(args, device, train_size, num_classes, trainable=args.pretrain)
     model.to(device).train()
 
     # 计算模型的FLOPs和参数量
@@ -284,7 +288,7 @@ def train():
                 checkpoint_path = os.path.join(path_to_save_weight, weight_name)
                 torch.save(model.state_dict(), checkpoint_path)
 
-            epoch_val_print = '[Epoch %d/%d][AP @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = %.2f || AP @[ IoU=0.50 | area=   all | maxDets=100 ] %.2f)'\
+            epoch_val_print = '[Epoch %d/%d][AP @[ IoU=0.50:0.95 | maxDets=100 ] = %.2f || AP @[ IoU=0.50 | maxDets=100 ] = %.2f)'\
                         % (epoch+1, max_epoch, ap50_95, ap50)                       
             log_file.write(epoch_val_print + '\n')
 

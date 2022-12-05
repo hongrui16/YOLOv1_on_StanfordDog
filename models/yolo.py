@@ -11,14 +11,14 @@ from .loss import compute_loss
 # YOLO
 class myYOLO(nn.Module):
     def __init__(self, device, input_size=None, num_classes=20, trainable=False, 
-                    conf_thresh=0.01, nms_thresh=0.5, backbone_arch = 'resnet18'):
+                    conf_thresh=0.01, nms_thresh=0.5, backbone_arch = 'resnet18', stride = 32):
         super(myYOLO, self).__init__()
         self.device = device                           # cuda或者是cpu
         self.num_classes = num_classes                 # 类别的数量
         self.trainable = trainable                     # 训练的标记
         self.conf_thresh = conf_thresh                 # 得分阈值
         self.nms_thresh = nms_thresh                   # NMS阈值
-        self.stride = 32                               # 网络的最大步长
+        self.stride = stride                           # 网络的最大步长
         self.grid_cell = self.create_grid(input_size)  # 网格坐标矩阵
         self.input_size = input_size                   # 输入图像大小
         
