@@ -61,6 +61,14 @@ use ```data/dataset_prepare.py``` to sort the dataset in the following folder st
   |── anno_json
   |      ├── test.json
 ```
+
+In order to match the dataset folder structure for classification and detection models training at the same time, images are saved under every category folder. When making annotation files, a json dict can be written as following:
+```
+…
+"file_name" : category/img_name, 
+…
+```
+
 After sorting the dataset as above, it can be used for classification model training as well as detection model training.
 
 
