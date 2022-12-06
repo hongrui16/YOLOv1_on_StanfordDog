@@ -69,7 +69,8 @@ use ```data/dataset_prepare.py``` to sort the dataset in the following folder st
   |      ├── test.json
 ```
 
-In order to match the dataset folder structure for classification and detection models training at the same time, images are saved under every category folder. When making annotation files, a json dict can be written as following:
+In order to match the ImageNet folder structure for classification model training,  images are saved under every category folder. To satisfy detection models training with COCO API and data-loader, when making annotation files, the value for “file_name” key in the json dict is written as following:
+
 ```
 …
 "file_name" : category/img_name, 
