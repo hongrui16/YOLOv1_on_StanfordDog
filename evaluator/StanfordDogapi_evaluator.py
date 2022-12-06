@@ -13,7 +13,7 @@ class StanfordDogAPIEvaluator():
     All the data in the val2017 dataset are processed \
     and evaluated by COCO API.
     """
-    def __init__(self, data_dir, img_size, device, testset=False, transform=None):
+    def __init__(self, data_dir, img_size, device, testset=False, transform=None, image_set = 'val'):
         """
         Args:
             data_dir (str): dataset root directory
@@ -31,13 +31,13 @@ class StanfordDogAPIEvaluator():
         self.map = -1.
 
         self.testset = testset
-
+        self.image_set = image_set
 
         self.dataset = StanfordDogDataset(
             data_dir=data_dir,
             img_size=img_size,
             transform=None,
-            image_set='val')
+            image_set=image_set)
 
 
     def evaluate(self, model):
@@ -54,7 +54,7 @@ class StanfordDogAPIEvaluator():
         ids = []
         data_dict = []
         num_images = len(self.dataset)
-        print('total number of images: %d' % (num_images))
+        print(f'{self.image_set}, total number of images: {num_images}')
 
         # start testing
         for index in range(num_images): # all the data in val2017

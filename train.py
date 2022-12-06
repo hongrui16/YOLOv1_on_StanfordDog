@@ -259,7 +259,7 @@ def train():
                             t1-t0))
 
                 t0 = time.time()
-            break
+            # break
         # evaluation
         epoch_tr_print = '[Epoch %d/%d][Iter %d/%d][lr %.6f]'\
                     '[Loss: obj %.2f || cls %.2f || bbox %.2f || total %.2f || size %d || time: %.2f]'\
