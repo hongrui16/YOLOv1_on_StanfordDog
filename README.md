@@ -1,7 +1,7 @@
 # YOLOv1_on_StanfordDog
 This repo is forked and edited based on https://github.com/yjh0410/PyTorch_YOLOv1.git
 
-## new features
+## New features
 
 - add classification model training 
 ```train_classification_net.py```
@@ -64,7 +64,7 @@ use ```data/dataset_prepare.py``` to sort the dataset in the following folder st
 After sorting the dataset as above, it can be used for classification model training as well as detection model training.
 
 
-## classification net training and evaluation
+## Classification net training and evaluation
 ```train_classification_net.sh```
 
 ```
@@ -76,7 +76,7 @@ python train_classification_net.py --data dataset/stanfordDogsDataset \
  --resume logs_cls/resnet101/2022-12-03_23-24-23/model_best.pth.tar
 ```
 
-## detection net training
+## Detection net training
 ```train.sh```
 
 ```
@@ -91,7 +91,7 @@ python train.py \
         --pretrain
 ```
 
-## detection net evaluation 
+## Detection net evaluation 
 ```eval.sh```
 
 ```
@@ -106,7 +106,7 @@ python eval.py \
         --resume logs_det/StanfordDog/resnet34/2022-12-05_20-15-28/weight/yolo_epoch_75_57.1.pth
 ```
 
-## others(push a local repo to another remote repo)
+## Others(push a local repo to another remote repo)
 - git remote add [remote_name] [remote_branch_name]
 - git remote set-url [remote_name] [remote repo url]
 - git push [remote_name] [local_branch]:[remote_branch_name]
