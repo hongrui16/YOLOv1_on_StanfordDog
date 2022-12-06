@@ -1,5 +1,5 @@
 
-python full_eval.py \
+python eval.py \
         --cuda \
         -d StanfordDog \
         --root /home/hongrui/project/dataset \
@@ -7,7 +7,7 @@ python full_eval.py \
         --arch resnet18 \
         --resume logs_det/StanfordDog/resnet18/2022-12-04_18-20-10/weight/yolo_epoch_71_56.9.pth
 
-python full_eval.py \
+python eval.py \
         --cuda \
         -d StanfordDog \
         --root /home/hongrui/project/dataset \
@@ -15,7 +15,7 @@ python full_eval.py \
         --arch resnet18 \
         --resume logs_det/StanfordDog/resnet18/2022-12-05_11-42-05/weight/yolo_epoch_61_15.1.pth
 
-python full_eval.py \
+python eval.py \
         --cuda \
         -d StanfordDog \
         --root /home/hongrui/project/dataset \
@@ -26,7 +26,7 @@ python full_eval.py \
         --resume logs_det/StanfordDog/resnet18/2022-12-05_20-13-37/weight/yolo_epoch_66_55.6.pth
 
 
-python full_eval.py \
+python eval.py \
         --cuda \
         -d StanfordDog \
         --root /home/hongrui/project/dataset \
@@ -34,7 +34,7 @@ python full_eval.py \
         --arch resnet34 \
         --resume logs_det/StanfordDog/resnet34/2022-12-04_18-39-34/weight/yolo_epoch_75_61.1.pth
 
-python full_eval.py \
+python eval.py \
         --cuda \
         -d StanfordDog \
         --root /home/hongrui/project/dataset \

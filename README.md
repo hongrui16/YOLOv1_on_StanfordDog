@@ -13,9 +13,58 @@ This repo is forked and edited based on https://github.com/yjh0410/PyTorch_YOLOv
 - add dataset arrangement code
 ```data/dataset_prepare.py```
 
-## train
+- add new evaluation code
+```eval.py```
+- add a new detection head
+```configure stride and input_size in train.py```
 
-### classification net training
+## Dataset Preparation
+use ```data/dataset_prepare.py``` to sort the dataset in the following folder structure
+```
+  train/
+  |── Images
+  |      ├── n02085620-Chihuahua
+  |      │   ├── n01440764_10026.jpg
+  |      │   ├── ......
+  |      ├── ......
+  |── Annotation
+  |      ├── n02085620-Chihuahua
+  |      │   ├── n01440764_10026
+  |      │   ├── ......
+  |      ├── ......
+  |── anno_json
+  |      ├── train.json
+  val/
+  |── Images
+  |      ├── n02085620-Chihuahua
+  |      │   ├── n01440764_10020.jpg
+  |      │   ├── ......
+  |      ├── ......
+  |── Annotation
+  |      ├── n02085620-Chihuahua
+  |      │   ├── n01440764_10020
+  |      │   ├── ......
+  |      ├── ......
+  |── anno_json
+  |      ├── val.json
+  test/
+  |── Images
+  |      ├── n02085620-Chihuahua
+  |      │   ├── n01440764_10016.jpg
+  |      │   ├── ......
+  |      ├── ......
+  |── Annotation
+  |      ├── n02085620-Chihuahua
+  |      │   ├── n01440764_10016
+  |      │   ├── ......
+  |      ├── ......
+  |── anno_json
+  |      ├── test.json
+```
+After sorting the dataset as above, it can be used for classification model training as well as detection model training.
+
+
+## classification net training and evaluation
 ```train_classification_net.sh```
 
 ```
@@ -27,7 +76,7 @@ python train_classification_net.py --data dataset/stanfordDogsDataset \
  --resume logs_cls/resnet101/2022-12-03_23-24-23/model_best.pth.tar
 ```
 
-### detection net training
+## detection net training
 ```train.sh```
 
 ```
@@ -40,6 +89,21 @@ python train.py \
         --gpu 2 \
         --arch resnet18 \
         --pretrain
+```
+
+## detection net evaluation 
+```eval.sh```
+
+```
+python eval.py \
+        --cuda \
+        -d StanfordDog \
+        --root /home/hongrui/project/dataset \
+        --gpu 1 \
+        --arch resnet34 \
+        --input_size 384 \
+        --stride 64 \
+        --resume logs_det/StanfordDog/resnet34/2022-12-05_20-15-28/weight/yolo_epoch_75_57.1.pth
 ```
 
 ## others(push a local repo to another remote repo)
