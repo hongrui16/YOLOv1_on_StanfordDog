@@ -10,13 +10,20 @@ This repo is forked and edited based on https://github.com/yjh0410/PyTorch_YOLOv
 ```data/stanford_dog.py```
 ```evaluator/StanfordDogapi_evaluator.py```
 
-- add dataset arrangement code
+- add dataset sorting code
 ```data/dataset_prepare.py```
 
 - add new evaluation code
 ```eval.py```
 - add a new detection head
 ```configure stride and input_size in train.py```
+
+## Dataset Download
+Dataset can be downloaded from kaggle or oficial website.
+- https://www.kaggle.com/datasets/jessicali9530/stanford-dogs-dataset
+
+- http://vision.stanford.edu/aditya86/ImageNetDogs/main.html
+
 
 ## Dataset Preparation
 use ```data/dataset_prepare.py``` to sort the dataset in the following folder structure
