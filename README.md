@@ -13,20 +13,22 @@ This repo is forked and edited based on https://github.com/yjh0410/PyTorch_YOLOv
 - add dataset sorting code
 ```data/dataset_prepare.py```
 
-- add new evaluation code
+- add new evaluation and inference code
 ```eval.py```
+
 - add a new detection head
 ```configure stride and input_size in train.py```
 
+
 ## Dataset Download
-Dataset can be downloaded from kaggle or oficial website.
+Dataset can be downloaded from kaggle or official website.
 - https://www.kaggle.com/datasets/jessicali9530/stanford-dogs-dataset
 
 - http://vision.stanford.edu/aditya86/ImageNetDogs/main.html
 
 
 ## Dataset Preparation
-use ```data/dataset_prepare.py``` to sort the dataset in the following folder structure
+Use ```data/dataset_prepare.py``` to sort the dataset to the following folder structure
 ```
   train/
   |── Images
@@ -121,6 +123,24 @@ python eval.py \
         --stride 64 \
         --resume logs_det/StanfordDog/resnet34/2022-12-05_20-15-28/weight/yolo_epoch_75_57.1.pth
 ```
+
+
+## Detection net inference 
+```eval.sh```
+
+```
+python eval.py \
+        --cuda \
+        -d StanfordDog \
+        --root /home/hongrui/project/dataset \
+        --gpu 1 \
+        --arch resnet34 \
+        --input_size 384 \
+        --stride 64 \
+        --resume logs_det/StanfordDog/resnet34/2022-12-05_20-15-28/weight/yolo_epoch_75_57.1.pth \
+        --inference
+```
+
 
 ## Others(push a local repo to another remote repo)
 - git remote add [remote_name] [remote_branch_name]

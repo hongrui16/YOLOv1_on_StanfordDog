@@ -87,7 +87,7 @@ class StanfordDogDataset(Dataset):
         path = os.path.join(self.data_dir, self.image_set, 'Images', image_info['file_name'])
         img = cv2.imread(path)
 
-        return img, id_
+        return img, id_, image_info['file_name']
 
 
     def __getitem__(self, index):

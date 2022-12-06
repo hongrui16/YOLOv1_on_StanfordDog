@@ -64,6 +64,10 @@ def parse_args():
 
     parser.add_argument('--input_size', default=0, type=int,
                     help='input image size')
+
+    parser.add_argument('--inference', action='store_true', default=False,
+                    help='inference model')
+
     return parser.parse_args()
 
 def get_current_time():
@@ -125,44 +129,55 @@ def eval():
         print('resume model weight from: %s' % (args.resume))
         model.load_state_dict(torch.load(args.resume, map_location=device))
 
-    
-    os.makedirs(log_dir, exist_ok=True)
-    logfile = os.path.join(log_dir, 'train_parameters.txt')
-    # if os.path.exists(logfile):
-    #     os.remove(logfile)
-    log_file = open(logfile, "a+")
-    log_file.write('\n')
-    log_file.write('Evaluation........' + '\n')
-    p=vars(args)
-    
-    log_file.write('current_time' + ':' + current_time + '\n')
-    log_file.write('\n')
-    for key, val in p.items():
-        log_file.write(key + ':' + str(val) + '\n')
-    log_file.write('\n')
-    log_file.write(FLOPs + '\n')
-    log_file.write(Params + '\n')
-    log_file.write('\n')
+    if args.inference:
+        save_dir = os.path.join(log_dir, 'infer')
+        os.makedirs(save_dir, exist_ok=True)
+        # avg_time_consumption = evaluator_val.inference(model, save_dir)
+        avg_time_consumption = evaluator_test.inference(model, save_dir)
+        logfile = os.path.join(log_dir, 'inference.txt')
+        # if os.path.exists(logfile):
+        #     os.remove(logfile)
+        log_file = open(logfile, "a+")
+        log_file.write(avg_time_consumption + '\n')
+        log_file.close()
+    else:
+        os.makedirs(log_dir, exist_ok=True)
+        logfile = os.path.join(log_dir, 'train_parameters.txt')
+        # if os.path.exists(logfile):
+        #     os.remove(logfile)
+        log_file = open(logfile, "a+")
+        log_file.write('\n')
+        log_file.write('Evaluation........' + '\n')
+        p=vars(args)
+        
+        log_file.write('current_time' + ':' + current_time + '\n')
+        log_file.write('\n')
+        for key, val in p.items():
+            log_file.write(key + ':' + str(val) + '\n')
+        log_file.write('\n')
+        log_file.write(FLOPs + '\n')
+        log_file.write(Params + '\n')
+        log_file.write('\n')
 
 
-    model.trainable = False
-    model.set_grid(val_size)
-    model.eval()
+        model.trainable = False
+        model.set_grid(val_size)
+        model.eval()
 
-    # evaluate
-    val_ap50_95, val_ap50 = evaluator_val.evaluate(model)
-    test_ap50_95, test_ap50 = evaluator_test.evaluate(model)
+        # evaluate
+        val_ap50_95, val_ap50 = evaluator_val.evaluate(model)
+        test_ap50_95, test_ap50 = evaluator_test.evaluate(model)
 
-    
-    val_print = '[val  ][AP @[ IoU=0.50:0.95 | maxDets=100 ] = %.2f || AP @[ IoU=0.50 | maxDets=100 ] = %.2f'\
-                % (val_ap50_95, val_ap50)                       
-    log_file.write(val_print + '\n')
+        
+        val_print = '[val  ][AP @[ IoU=0.50:0.95 | maxDets=100 ] = %.2f || AP @[ IoU=0.50 | maxDets=100 ] = %.2f'\
+                    % (val_ap50_95, val_ap50)                       
+        log_file.write(val_print + '\n')
 
-    test_print = '[test ][AP @[ IoU=0.50:0.95 | maxDets=100 ] = %.2f || AP @[ IoU=0.50 | maxDets=100 ] = %.2f'\
-                % (test_ap50_95, test_ap50)                       
-    log_file.write(test_print + '\n')
+        test_print = '[test ][AP @[ IoU=0.50:0.95 | maxDets=100 ] = %.2f || AP @[ IoU=0.50 | maxDets=100 ] = %.2f'\
+                    % (test_ap50_95, test_ap50)                       
+        log_file.write(test_print + '\n')
 
-    log_file.close()
+        log_file.close()
     
     
 
