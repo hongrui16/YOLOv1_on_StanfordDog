@@ -141,6 +141,12 @@ python eval.py \
         --inference
 ```
 
+## Detection result examples
+![avatar](det_result/n02086646-Blenheim_spaniel_n02086646_567.jpg)
+![avatar](det_result/n02088094-Afghan_hound_n02088094_4517.jpg)
+![avatar](det_result/n02086910-papillon_n02086910_1933.jpg)
+![avatar](det_result/n02086240-Shih-Tzu_n02086240_1725.jpg)
+
 
 ## Others(push a local repo to another remote repo)
 - git remote add [remote_name] [remote_branch_name]
