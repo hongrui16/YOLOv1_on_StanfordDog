@@ -26,7 +26,7 @@ from evaluator.StanfordDogapi_evaluator import StanfordDogAPIEvaluator
 
 from models.build import build_yolo
 from models.matcher import gt_creator
-
+from utils.util import get_current_time
 
 def parse_args():
     parser = argparse.ArgumentParser(description='YOLO Detection')
@@ -93,10 +93,7 @@ def parse_args():
                     help='input image size')
     return parser.parse_args()
 
-def get_current_time():
-    tz = pytz.timezone('US/Eastern')
-    current_time = datetime.datetime.now(tz).strftime("%Y-%m-%d_%H-%M-%S")
-    return str(current_time)
+
 
 def train():
     args = parse_args()

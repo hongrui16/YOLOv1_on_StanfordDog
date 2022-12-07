@@ -23,6 +23,7 @@ from utils.com_paras_flops import FLOPs_and_Params
 from evaluator.cocoapi_evaluator import COCOAPIEvaluator
 from evaluator.vocapi_evaluator import VOCAPIEvaluator
 from evaluator.StanfordDogapi_evaluator import StanfordDogAPIEvaluator
+from utils.util import get_current_time
 
 from models.build import build_yolo
 from models.matcher import gt_creator
@@ -70,10 +71,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def get_current_time():
-    tz = pytz.timezone('US/Eastern')
-    current_time = datetime.datetime.now(tz).strftime("%Y-%m-%d_%H-%M-%S")
-    return str(current_time)
+
 
 def eval():
     args = parse_args()
@@ -134,30 +132,39 @@ def eval():
         os.makedirs(save_dir, exist_ok=True)
         # avg_time_consumption = evaluator_val.inference(model, save_dir)
         avg_time_consumption = evaluator_test.inference(model, save_dir)
-        logfile = os.path.join(log_dir, 'inference.txt')
-        # if os.path.exists(logfile):
-        #     os.remove(logfile)
-        log_file = open(logfile, "a+")
-        log_file.write(avg_time_consumption + '\n')
-        log_file.close()
-    else:
-        os.makedirs(log_dir, exist_ok=True)
-        logfile = os.path.join(log_dir, 'train_parameters.txt')
+        logfile = os.path.join(log_dir, 'parameters.txt')
         # if os.path.exists(logfile):
         #     os.remove(logfile)
         log_file = open(logfile, "a+")
         log_file.write('\n')
-        log_file.write('Evaluation........' + '\n')
+        log_file.write('---------------Inference---------' + '\n')
         p=vars(args)
         
         log_file.write('current_time' + ':' + current_time + '\n')
+        
+        log_file.write(avg_time_consumption + '\n')
+        log_file.write('---------------Inference END---------' + '\n')
         log_file.write('\n')
+        log_file.close()
+    else:
+        os.makedirs(log_dir, exist_ok=True)
+        logfile = os.path.join(log_dir, 'parameters.txt')
+        # if os.path.exists(logfile):
+        #     os.remove(logfile)
+        log_file = open(logfile, "a+")
+        # log_file.write('\n')
+        log_file.write('\n')
+        log_file.write('---------------Evaluation---------' + '\n')
+        p=vars(args)
+        
+        log_file.write('current_time' + ':' + current_time + '\n')
+        
         for key, val in p.items():
             log_file.write(key + ':' + str(val) + '\n')
         log_file.write('\n')
         log_file.write(FLOPs + '\n')
         log_file.write(Params + '\n')
-        log_file.write('\n')
+        # 
 
 
         model.trainable = False
@@ -174,9 +181,11 @@ def eval():
         log_file.write(val_print + '\n')
 
         test_print = '[test ][AP @[ IoU=0.50:0.95 | maxDets=100 ] = %.2f || AP @[ IoU=0.50 | maxDets=100 ] = %.2f'\
-                    % (test_ap50_95, test_ap50)                       
+                    % (test_ap50_95, test_ap50)          
+        
         log_file.write(test_print + '\n')
-
+        log_file.write('---------------Evaluation END-------------' + '\n')             
+        log_file.write('\n')
         log_file.close()
     
     

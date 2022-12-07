@@ -13,7 +13,10 @@ import webcolors
 from torch import nn
 from torch.nn.init import _calculate_fan_in_and_fan_out, _no_grad_normal_
 from torchvision.ops.boxes import batched_nms
-
+import time
+from time import gmtime, strftime
+import pytz
+import datetime
 
 
 class_labels = {1: 'Chihuahua', 2: 'Japanese_spaniel', 3: 'Maltese_dog', 4: 'Pekinese', 5: 'Shih-Tzu', 
@@ -125,3 +128,8 @@ def standard_to_bgr(list_color_name):
 color_list = standard_to_bgr(STANDARD_COLORS)
 
 
+
+def get_current_time():
+    tz = pytz.timezone('US/Eastern')
+    current_time = datetime.datetime.now(tz).strftime("%Y-%m-%d_%H-%M-%S")
+    return str(current_time)

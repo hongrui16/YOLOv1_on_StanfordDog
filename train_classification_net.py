@@ -311,11 +311,12 @@ def main_worker(gpu, ngpus_per_node, args):
         test_result = f'test: Acc@1 {acc1} Acc@5 {acc5}'
 
         log_dir = args.resume[:args.resume.find(args.resume.split('/')[-1])]
-        logfile = os.path.join(log_dir, 'eval_parameters.txt')
-        if os.path.exists(logfile):
-            os.remove(logfile)
+        logfile = os.path.join(log_dir, 'parameters.txt')
+        # if os.path.exists(logfile):
+        #     os.remove(logfile)
         p=vars(args)
         log_file = open(logfile, "a+")
+        log_file.write('\n')
         log_file.write('current_time' + ':' + current_time + '\n')
         for key, val in p.items():
             log_file.write(key + ':' + str(val) + '\n')
@@ -326,7 +327,7 @@ def main_worker(gpu, ngpus_per_node, args):
         return
 
     os.makedirs(log_dir, exist_ok = True)
-    logfile = os.path.join(log_dir, 'train_parameters.txt')
+    logfile = os.path.join(log_dir, 'parameters.txt')
     if os.path.exists(logfile):
         os.remove(logfile)
     p=vars(args)
