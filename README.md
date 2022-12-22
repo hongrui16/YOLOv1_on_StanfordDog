@@ -28,7 +28,7 @@ Dataset can be downloaded from kaggle or official website.
 
 
 ## Dataset Preparation
-Use ```data/dataset_prepare.py``` to sort the dataset to the following folder structure
+Use ```data/dataset_prepare.py``` to sort the dataset to the following folder structure, split the dataset into 'Train'(70%), 'val'(15%), and 'test'(15%).
 ```
   train/
   |── Images
@@ -93,6 +93,9 @@ python train_classification_net.py --data dataset/stanfordDogsDataset \
  --arch resnet101 \
  --resume logs_cls/resnet101/2022-12-03_23-24-23/model_best.pth.tar
 ```
+## Classification evaluation results
+compare the classification model performance with different backbones
+![avatar](det_result/cls_eval.jpg)
 
 ## Detection net training
 ```train.sh```
@@ -140,6 +143,19 @@ python eval.py \
         --resume logs_det/StanfordDog/resnet34/2022-12-05_20-15-28/weight/yolo_epoch_75_57.1.pth \
         --inference
 ```
+## Detection net evaluation results
+compare the YOLO V1 performance with different backbones
+![avatar](det_result/yolov1_result.jpg)
+
+## Add a new small detection head to replace the original head
+### Structure modification
+![avatar](det_result/structure_modification.jpg)
+
+### Parameters comparison
+![avatar](det_result/parameter_comparison.jpg)
+
+### Evaluation results comparison
+![avatar](det_result/ap_comparison.jpg)
 
 ## Detection result examples
 ![avatar](det_result/n02086646-Blenheim_spaniel_n02086646_567.jpg)
