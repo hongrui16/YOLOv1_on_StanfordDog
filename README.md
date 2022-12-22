@@ -1,7 +1,7 @@
 # YOLOv1_on_StanfordDog
 This repo is forked and edited based on https://github.com/yjh0410/PyTorch_YOLOv1.git
 
-## New features
+## 1. New features
 
 - add classification model training 
 ```train_classification_net.py```
@@ -20,14 +20,14 @@ This repo is forked and edited based on https://github.com/yjh0410/PyTorch_YOLOv
 ```configure stride and input_size in train.py```
 
 
-## Dataset Download
+## 2. Dataset Download
 Dataset can be downloaded from kaggle or official website.
 - https://www.kaggle.com/datasets/jessicali9530/stanford-dogs-dataset
 
 - http://vision.stanford.edu/aditya86/ImageNetDogs/main.html
 
 
-## Dataset Preparation
+## 3. Dataset Preparation
 Use ```data/dataset_prepare.py``` to sort the dataset to the following folder structure, split the dataset into 'Train'(70%), 'val'(15%), and 'test'(15%).
 ```
   train/
@@ -82,7 +82,7 @@ In order to match the ImageNet folder structure for classification model trainin
 After sorting the dataset as above, it can be used for classification model training as well as detection model training.
 
 
-## Classification net training and evaluation
+## 4. Classification net training and evaluation
 ```train_classification_net.sh```
 
 ```
@@ -93,11 +93,11 @@ python train_classification_net.py --data dataset/stanfordDogsDataset \
  --arch resnet101 \
  --resume logs_cls/resnet101/2022-12-03_23-24-23/model_best.pth.tar
 ```
-## Classification evaluation results
+## 5. Classification evaluation results
 compare the classification model performance with different backbones
 ![avatar](det_result/cls_eval.jpg)
 
-## Detection net training
+## 6. Detection net training
 ```train.sh```
 
 ```
@@ -112,7 +112,7 @@ python train.py \
         --pretrain
 ```
 
-## Detection net evaluation 
+## 7. Detection net evaluation 
 ```eval.sh```
 
 ```
@@ -128,7 +128,7 @@ python eval.py \
 ```
 
 
-## Detection net inference 
+## 8. Detection net inference 
 ```eval.sh```
 
 ```
@@ -143,28 +143,28 @@ python eval.py \
         --resume logs_det/StanfordDog/resnet34/2022-12-05_20-15-28/weight/yolo_epoch_75_57.1.pth \
         --inference
 ```
-## Detection net evaluation results
+## 9. Detection net evaluation results
 compare the YOLO V1 performance with different backbones
 ![avatar](det_result/yolov1_result.jpg)
 
-## Add a new small detection head to replace the original head
-### Structure modification
+## 10. Add a new small detection head to replace the original head
+### 10.1. Structure modification
 ![avatar](det_result/structure_modification.jpg)
 
-### Parameters comparison
+### 10.2. Parameters comparison
 ![avatar](det_result/parameter_comparison.jpg)
 
-### Evaluation results comparison
+### 10.3. Evaluation results comparison
 ![avatar](det_result/ap_comparison.jpg)
 
-## Detection result examples
+## 11. Detection result examples
 ![avatar](det_result/n02086646-Blenheim_spaniel_n02086646_567.jpg)
 ![avatar](det_result/n02088094-Afghan_hound_n02088094_4517.jpg)
 ![avatar](det_result/n02086910-papillon_n02086910_1933.jpg)
 ![avatar](det_result/n02086240-Shih-Tzu_n02086240_1725.jpg)
 
 
-## Others(push a local repo to another remote repo)
+## 12. Others(push a local repo to another remote repo)
 - git remote add [remote_name] [remote_branch_name]
 - git remote set-url [remote_name] [remote repo url]
 - git push [remote_name] [local_branch]:[remote_branch_name]
